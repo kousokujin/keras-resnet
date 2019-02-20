@@ -13,6 +13,7 @@ from keras.callbacks import ReduceLROnPlateau, CSVLogger, EarlyStopping
 
 import numpy as np
 import resnet
+from ModelBuilder import ResnetBuilder
 
 
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
@@ -21,7 +22,7 @@ csv_logger = CSVLogger('resnet18_cifar10.csv')
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 200
+nb_epoch = 1
 data_augmentation = True
 
 # input image dimensions
@@ -46,7 +47,8 @@ X_test -= mean_image
 X_train /= 128.
 X_test /= 128.
 
-model = resnet.ResnetBuilder.build_resnet_18((img_channels, img_rows, img_cols), nb_classes)
+#model = ResnetBuilder.build_resnet_18((img_channels, img_rows, img_cols), nb_classes)
+model = ResnetBuilder.build_dualresnet_18((img_channels, img_rows, img_cols), nb_classes)
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
