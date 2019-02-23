@@ -9,12 +9,33 @@ from keras import backend as K
 
 class ResNetTester:
 
-    def __init__(self,name):
+    def setDataset(self,dataset):
+        self.trainX = dataset.trainX
+        self.trainY = dataset.trainY
+        self.testX = dataset.testX
+        self.testY = dataset.testY
+
         #バッチサイズなど
         self.batch_size = 128
-        self.nb_epoch = 20
+        self.nb_epoch = 30
         self.img_rows, self.img_cols = 32, 32
+
+    def run_model(self,model):
+        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["acc"])
+        self.history = model.fit(self.trainX,self.trainY,batch_size=self.batch_size,nb_epoch=self.nb_epoch,verbose=1,validation_split=0.1)
+        self.model = model
+
+    def evalute_model(self):
+        self.score=self.model.evaluate(self.testX,self.testY,verbose=0)
+        print('Test loss:',self.score[0])
+        print('Test accuracy:',self.score[1])
+
+    def __init__(self,name):
         self.name = name
+
+class datasets:
+    
+    def __init__(self):
 
         #データセット
         (trainX, trainY), (testX, testY) = cifar10.load_data()
@@ -34,14 +55,5 @@ class ResNetTester:
         self.trainY = trainY
         self.testY = testY
 
-        self.init_shape = (3, 32, 32) if K.image_dim_ordering() == 'th' else (32, 32, 3)
-
-    def run_model(self,model):
-        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["acc"])
-        self.history = model.fit(self.trainX,self.trainY,batch_size=self.batch_size,nb_epoch=self.nb_epoch,verbose=1,validation_split=0.1)
-        self.model = model
-
-    def evalute_model(self):
-        self.score=self.model.evaluate(self.testX,self.testY,verbose=0)
-        print('Test loss:',self.score[0])
-        print('Test accuracy:',self.score[1])
+        #self.init_shape = (3, 32, 32) if K.image_dim_ordering() == 'th' else (32, 32, 3)
+        self.init_shape = (3,32,32)

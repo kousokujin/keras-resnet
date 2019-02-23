@@ -18,6 +18,9 @@ from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
 
+from Invert_ReLu_resnet import (_invert_bn_relu,_invert_bn_relu_conv)
+
+
 
 def _bn_relu(input):
     """Helper to build a BN -> relu block
@@ -92,7 +95,7 @@ def _shortcut(input, residual):
     return add([shortcut, residual])
 
 
-def _residual_block(block_function, filters, repetitions, is_first_layer=False):
+def _residual_block(block_function, filters, repetitions, is_first_layer=False,option=False):
     """Builds a residual block with repeating bottleneck blocks.
     """
     def f(input):
@@ -101,13 +104,13 @@ def _residual_block(block_function, filters, repetitions, is_first_layer=False):
             if i == 0 and not is_first_layer:
                 init_strides = (2, 2)
             input = block_function(filters=filters, init_strides=init_strides,
-                                   is_first_block_of_first_layer=(is_first_layer and i == 0))(input)
+                                   is_first_block_of_first_layer=(is_first_layer and i == 0),option=option)(input)
         return input
 
     return f
 
 
-def basic_block(filters, init_strides=(1, 1), is_first_block_of_first_layer=False):
+def basic_block(filters, init_strides=(1, 1), is_first_block_of_first_layer=False,option=False):
     """Basic 3 X 3 convolution blocks for use on resnets with layers <= 34.
     Follows improved proposed scheme in http://arxiv.org/pdf/1603.05027v2.pdf
     """
@@ -121,16 +124,25 @@ def basic_block(filters, init_strides=(1, 1), is_first_block_of_first_layer=Fals
                            kernel_initializer="he_normal",
                            kernel_regularizer=l2(1e-4))(input)
         else:
-            conv1 = _bn_relu_conv(filters=filters, kernel_size=(3, 3),
+
+            if option:
+                conv1 = _invert_bn_relu_conv(filters=filters, kernel_size=(3, 3),
+                                  strides=init_strides)(input)
+            else:
+                conv1 = _bn_relu_conv(filters=filters, kernel_size=(3, 3),
                                   strides=init_strides)(input)
 
-        residual = _bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv1)
+        if option:
+            residual = _invert_bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv1)
+        else:
+            residual = _bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv1)
+        
         return _shortcut(input, residual)
 
     return f
 
 
-def bottleneck(filters, init_strides=(1, 1), is_first_block_of_first_layer=False):
+def bottleneck(filters, init_strides=(1, 1), is_first_block_of_first_layer=False,option=False):
     """Bottleneck architecture for > 34 layer resnet.
     Follows improved proposed scheme in http://arxiv.org/pdf/1603.05027v2.pdf
 
@@ -147,11 +159,19 @@ def bottleneck(filters, init_strides=(1, 1), is_first_block_of_first_layer=False
                               kernel_initializer="he_normal",
                               kernel_regularizer=l2(1e-4))(input)
         else:
-            conv_1_1 = _bn_relu_conv(filters=filters, kernel_size=(1, 1),
+            if option:
+                conv_1_1 = _invert_bn_relu_conv(filters=filters, kernel_size=(1, 1),
+                                     strides=init_strides)(input)
+            else:
+                conv_1_1 = _bn_relu_conv(filters=filters, kernel_size=(1, 1),
                                      strides=init_strides)(input)
 
-        conv_3_3 = _bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv_1_1)
-        residual = _bn_relu_conv(filters=filters * 4, kernel_size=(1, 1))(conv_3_3)
+        if option:
+            conv_3_3 = _invert_bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv_1_1)
+            residual = _invert_bn_relu_conv(filters=filters * 4, kernel_size=(1, 1))(conv_3_3)
+        else:
+            conv_3_3 = _bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv_1_1)
+            residual = _bn_relu_conv(filters=filters * 4, kernel_size=(1, 1))(conv_3_3)
         return _shortcut(input, residual)
 
     return f

@@ -14,7 +14,7 @@ from keras.layers.convolutional import (
     MaxPooling2D,
     AveragePooling2D
 )
-from keras.layers import (Add,Lambda)
+from keras.layers import (Add,Lambda,Concatenate)
 from keras.layers.merge import add
 from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
@@ -61,18 +61,38 @@ def _invRelu_conv(**conv_params):
 
     return f
 
-def dual_relu_residual(**conv_params):
+def dual_relu_residual(option = False,**conv_params):
+    #filters = conv_params["filters"]
+    kernel_size = conv_params["kernel_size"]
+    strides = conv_params.setdefault("strides", (1, 1))
+    kernel_initializer = conv_params.setdefault("kernel_initializer", "he_normal")
+    padding = conv_params.setdefault("padding", "same")
+    kernel_regularizer = conv_params.setdefault("kernel_regularizer", l2(1.e-4))
+
+    if option:
+        filters = int(conv_params["filters"]/2)
+    else:
+        filters = conv_params["filters"]
 
     def f(input):
         AXIS = _handle_dim_ordering()
         BN = BatchNormalization(axis=AXIS[2])(input)
-        positive_conv = _relu_conv(**conv_params)(BN)
-        negative_conv = _invRelu_conv(**conv_params)(BN)
-        return Add()([positive_conv,negative_conv])
+        positive_conv = _relu_conv(filters=filters, kernel_size=kernel_size,
+                      strides=strides, padding=padding,
+                      kernel_initializer=kernel_initializer,
+                      kernel_regularizer=kernel_regularizer)(BN)
+        negative_conv = _invRelu_conv(filters=filters, kernel_size=kernel_size,
+                      strides=strides, padding=padding,
+                      kernel_initializer=kernel_initializer,
+                      kernel_regularizer=kernel_regularizer)(BN)
+        if option:
+            return Concatenate(axis=0)([positive_conv,negative_conv])
+        else:
+            return Add()([positive_conv,negative_conv])
     return f
 
 
-def dual_relu_basic_block(filters, init_strides=(1, 1), is_first_block_of_first_layer=False):
+def dual_relu_basic_block(filters, init_strides=(1, 1), is_first_block_of_first_layer=False,option = False):
 
     def f(input):
 
@@ -85,15 +105,15 @@ def dual_relu_basic_block(filters, init_strides=(1, 1), is_first_block_of_first_
                            kernel_regularizer=l2(1e-4))(input)
         else:
             conv1 = dual_relu_residual(filters=filters, kernel_size=(3, 3),
-                                  strides=init_strides)(input)
+                                  strides=init_strides,option=option)(input)
 
-        residual = dual_relu_residual(filters=filters, kernel_size=(3, 3))(conv1)
+        residual = dual_relu_residual(filters=filters, kernel_size=(3, 3),option=option)(conv1)
         return _shortcut(input, residual)
 
     return f
 
 
-def dual_relu_bottleneck(filters, init_strides=(1, 1), is_first_block_of_first_layer=False):
+def dual_relu_bottleneck(filters, init_strides=(1, 1), is_first_block_of_first_layer=False,option = False):
 
     def f(input):
 
@@ -106,10 +126,10 @@ def dual_relu_bottleneck(filters, init_strides=(1, 1), is_first_block_of_first_l
                               kernel_regularizer=l2(1e-4))(input)
         else:
             conv_1_1 = dual_relu_residual(filters=filters, kernel_size=(1, 1),
-                                     strides=init_strides)(input)
+                                     strides=init_strides,option=option)(input)
 
-        conv_3_3 = dual_relu_residual(filters=filters, kernel_size=(3, 3))(conv_1_1)
-        residual = dual_relu_residual(filters=filters * 4, kernel_size=(1, 1))(conv_3_3)
+        conv_3_3 = dual_relu_residual(filters=filters, kernel_size=(3, 3),option=option)(conv_1_1)
+        residual = dual_relu_residual(filters=filters * 4, kernel_size=(1, 1),option=option)(conv_3_3)
         return _shortcut(input, residual)
 
     return f

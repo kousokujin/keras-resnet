@@ -31,6 +31,6 @@ def outputfile_evalute(score,name):
     #結果のファイル出力
     path = 'result.txt'
     with open(path,mode='a') as f:
-        f.write('===' + name + '===')
-        f.write('Test loss:' + str(score[0]))
-        f.write('Test accuracy:' + str(score[1]))
+        f.write('===' + name + '===\n')
+        f.write('Test loss:' + str(score[0]) + '\n')
+        f.write('Test accuracy:' + str(score[1])+'\n')

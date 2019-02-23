@@ -15,6 +15,7 @@ import numpy as np
 import resnet
 from ModelBuilder import ResnetBuilder
 
+from plot_result import plot_acc_history
 
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
 early_stopper = EarlyStopping(min_delta=0.001, patience=10)
@@ -22,8 +23,8 @@ csv_logger = CSVLogger('resnet18_cifar10.csv')
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 1
-data_augmentation = True
+nb_epoch = 100
+data_augmentation = False
 
 # input image dimensions
 img_rows, img_cols = 32, 32
@@ -55,12 +56,13 @@ model.compile(loss='categorical_crossentropy',
 
 if not data_augmentation:
     print('Not using data augmentation.')
-    model.fit(X_train, Y_train,
+    history = model.fit(X_train, Y_train,
               batch_size=batch_size,
               nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test),
               shuffle=True,
               callbacks=[lr_reducer, early_stopper, csv_logger])
+    plot_acc_history(history)
 else:
     print('Using real-time data augmentation.')
     # This will do preprocessing and realtime data augmentation:
