@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
+from datetime import datetime
 
-def plot_acc_history(history, legend=['acc']):
+def plot_acc_history(history, legend=['acc'], path='acc_history.png'):
     # print(history.history.keys())
 
     # 精度の履歴をプロット
@@ -12,9 +13,9 @@ def plot_acc_history(history, legend=['acc']):
     plt.ylabel('accuracy')
     plt.legend(legend, loc='lower right')
     #plt.show()
-    plt.savefig('acc_history.png')
+    plt.savefig(path)
 
-def plot_loss_history(history, legend=['loss']):
+def plot_loss_history(history, legend=['loss'],path='loss_history.png'):
     # 損失の履歴をプロット
 
     for h in history:
@@ -25,12 +26,15 @@ def plot_loss_history(history, legend=['loss']):
     plt.ylabel('loss')
     plt.legend(legend, loc='lower right')
     #plt.show()
-    plt.savefig('loss_history.png')
+    plt.savefig(path)
 
-def outputfile_evalute(score,name):
+def outputfile_evalute(score,name,path='result.txt'):
     #結果のファイル出力
-    path = 'result.txt'
     with open(path,mode='a') as f:
         f.write('===' + name + '===\n')
         f.write('Test loss:' + str(score[0]) + '\n')
         f.write('Test accuracy:' + str(score[1])+'\n')
+
+def get_time():
+    #現在時刻を取得
+    return datetime.now().strftime("%Y/%m/%d_%H:%M:%S")

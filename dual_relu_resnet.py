@@ -86,7 +86,7 @@ def dual_relu_residual(option = False,**conv_params):
                       kernel_initializer=kernel_initializer,
                       kernel_regularizer=kernel_regularizer)(BN)
         if option:
-            return Concatenate(axis=0)([positive_conv,negative_conv])
+            return Concatenate(axis=3)([positive_conv,negative_conv])
         else:
             return Add()([positive_conv,negative_conv])
     return f

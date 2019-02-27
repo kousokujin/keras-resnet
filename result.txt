@@ -1,9 +1,12 @@
 ===ResNet18===
-Test loss:1.9717391975402832
-Test accuracy:0.4946
+Test loss:1.8865080564498902
+Test accuracy:0.6982
 ===Invert_ResNet18===
-Test loss:1.917921190071106
-Test accuracy:0.516
+Test loss:1.7566941564559937
+Test accuracy:0.7078
 ===Dual_ReLU_ResNet18===
-Test loss:2.758419124984741
-Test accuracy:0.3851
+Test loss:1.6442614790916443
+Test accuracy:0.7125
+===Dual_ReLU_Concatenate_ResNet18===
+Test loss:2.0767233057022096
+Test accuracy:0.673
