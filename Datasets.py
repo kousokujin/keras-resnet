@@ -18,6 +18,9 @@ class abstract_dataset:
     @abstractmethod
     def get_name(self):
         raise NotImplementedError()
+    @abstractmethod
+    def get_categorical(self):
+        raise NotImplementedError()
 
     def __init__(self):
         (trainX, trainY), (testX, testY) = self.download()
@@ -49,6 +52,9 @@ class cifer10_datasets(abstract_dataset):
 
     def get_name(self):
         return 'cifer10'
+    
+    def get_categorical(self):
+        return 10
 
 class cifer100_datasets(abstract_dataset):
     
@@ -60,16 +66,31 @@ class cifer100_datasets(abstract_dataset):
 
     def get_name(self):
         return 'cifer100'
+    
+    def get_categorical(self):
+        return 100
 
 class mnist_dataset(abstract_dataset):
 
     def download(self):
-        return mnist.load_data()
+        (trainX, trainY), (testX, testY) = mnist.load_data()
+        trainX_size = trainX.shape[0]
+        testX_size = testX.shape[0]
+        trainX = np.array(trainX)
+        testX = np.array(testX)
+        
+        trainX = np.reshape(trainX,[trainX_size,28,28,1])
+        testX = np.reshape(testX,[testX_size,28,28,1])
+        
+        return (trainX, trainY), (testX, testY)
 
     def get_shape(self):
         return (1, 28, 28)
 
     def get_name(self):
         return 'mnist'
+    
+    def get_categorical(self):
+        return 10
 
 
