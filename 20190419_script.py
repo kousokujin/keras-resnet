@@ -27,7 +27,7 @@ def run(model,tester,global_name):
     json_write(tester,'result/'+global_name)
 
 
-global_name = "20190419_test.json"
+global_name = "20190424_test.json"
 
 block_methods=[
     "basic_block",
@@ -47,7 +47,7 @@ relu_option = False
 epochs = 10
 split = 1.0
 batch_size = 32
-dataset = mnist_dataset(is_zero_center=True)
+dataset = cifer10_dataset(is_zero_center=True)
 
 for m in block_methods:
     for input_mode in double_input:

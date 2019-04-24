@@ -1,6 +1,9 @@
 # test-related
 .coverage
 .cache
+result/
+*.pyc
+
 
 # dev envs
 .idea/

@@ -1,0 +1,26 @@
+{
+    "auto": "true",
+    "file_name": "test.png",
+    "labels": [
+        "ResNet18-DoubleInput",
+        "ResNet18"
+    ],
+    "title": "test",
+    "type": "bar",
+    "x": [
+        "1024",
+        "512"
+    ],
+    "x_name": "batch_size",
+    "y": [
+        [
+            "0.9842",
+            "0.9732"
+        ],
+        [
+            "0.9541",
+            "0.9807"
+        ]
+    ],
+    "y_name": "accuracy"
+}
