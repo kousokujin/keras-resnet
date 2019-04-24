@@ -22,7 +22,7 @@ class abstract_dataset:
     def get_categorical(self):
         raise NotImplementedError()
 
-    def __init__(self):
+    def __init__(self,is_zero_center=False):
         (trainX, trainY), (testX, testY) = self.download()
 
         trainX = trainX.astype('float32')
@@ -32,6 +32,10 @@ class abstract_dataset:
 
         trainY = kutils.to_categorical(trainY)
         testY = kutils.to_categorical(testY)
+
+        if is_zero_center == True:
+            trainX -= 0.5
+            testX -= 0.5
 
         self.trainX = trainX
         self.testX = testX

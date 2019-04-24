@@ -1,5 +1,15 @@
 from ModelBuilder import ResnetBuilder
+from Datasets import mnist_dataset
+from keras.utils import plot_model
 
-input_shape = (32, 32, 3)
-model = ResnetBuilder.build_concatenate_dualresnet_18(input_shape,10)
-model_summary = model.summary()
+dataset = mnist_dataset(is_zero_center=False)
+
+option = {
+    "relu_option": True,
+    "double_input": False,
+    "concatenate": "sum",
+    "block": "basic_block"
+}
+model = ResnetBuilder.build_manual(dataset.get_shape(),dataset.get_categorical(),option)
+model.summary()
+plot_model(model, to_file='model.png')

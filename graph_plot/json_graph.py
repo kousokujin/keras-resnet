@@ -12,7 +12,7 @@ class json_plot_data:
         datapath = os.path.normpath(joinpath)
 
         s = ""
-        with open(datapath) as f:
+        with open(path) as f:
             s = f.read()
 
         self.dict_json= json.loads(s)

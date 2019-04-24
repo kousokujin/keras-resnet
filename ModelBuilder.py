@@ -5,7 +5,9 @@ from resnet import (
     _residual_block,
     AveragePooling2D,
     basic_block,
-    bottleneck
+    bottleneck,
+    _bn_InvRelu,
+    _conv_bn
 )
 from dual_relu_resnet import(
     dual_relu_basic_block,
@@ -18,14 +20,16 @@ from keras.layers import (
     Input,
     Activation,
     Dense,
-    Flatten
+    Flatten,
+    Concatenate,
+    Lambda
 )
 from keras import backend as K
 from keras.models import Model
 
 class ResnetBuilder(object):
     @staticmethod
-    def build(input_shape, num_outputs, block_fn, repetitions,option = False):
+    def build(input_shape, num_outputs, block_fn, repetitions,option):
         """Builds a custom ResNet like architecture.
 
         Args:
@@ -43,6 +47,10 @@ class ResnetBuilder(object):
         ROW_AXIS = AXIS[0]
         COL_AXIS = AXIS[1]
 
+        #options
+        inv_relu = bool(option["relu_option"])
+        double_input = bool(option["double_input"])
+
         if len(input_shape) != 3:
             raise Exception("Input shape should be a tuple (nb_channels, nb_rows, nb_cols)")
 
@@ -52,125 +60,206 @@ class ResnetBuilder(object):
 
         # Load function from str if needed.
         block_fn = _get_block(block_fn)
-
         input = Input(shape=input_shape)
-        conv1 = _conv_bn_relu(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
-        #if (block_fn == basic_block) or (block_fn == bottleneck):
-        #    conv1 = _conv_bn_relu(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
-        #else:
-        #    conv1 = dual_relu_residual(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
-        
-        pool1 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="same")(conv1)
 
-        block = pool1
-        filters = 64
-        for i, r in enumerate(repetitions):
-            block = _residual_block(block_fn, filters=filters, repetitions=r, is_first_layer=(i == 0),option=option)(block)
-            filters *= 2
+        #conv1 = _conv_bn_relu(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
+        conv1 = _conv_bn(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
 
-        # Last activation
-        if (block_fn == basic_block) or (block_fn == bottleneck):
-            if option:
-                block = _invert_bn_relu(block)
+        if (block_fn == basic_block) or (block_fn == bottleneck) :
+            if inv_relu == True:
+                invert_positive = Lambda(lambda x: x*(-1))(conv1)
+                relu_positive = Activation("relu")(invert_positive)
+            else:
+                relu_positive = Activation("relu")(conv1)
+        else:
+            relu_positive = Activation("relu")(conv1)
+
+        if double_input == True:
+            invert = Lambda(lambda x: x*(-1))(conv1)
+            relu_negative = Activation("relu")(invert)
+
+        def f(x):    
+            pool1 = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="same")(x)
+
+            block = pool1
+            filters = 64
+            for i, r in enumerate(repetitions):
+                block = _residual_block(block_fn, filters=filters, repetitions=r, option=option,is_first_layer=(i == 0))(block)
+                filters *= 2
+
+            # Last activation
+            if (block_fn == basic_block) or (block_fn == bottleneck):
+                if inv_relu:
+                    block = _invert_bn_relu(block)
+                else:
+                    block = _bn_relu(block)
             else:
                 block = _bn_relu(block)
+
+            # Classifier block
+            #ROW_AXIS = _handle_dim_ordering().ROW_AXIS
+            #COL_AXIS = _handle_dim_ordering().COL_AXIS
+
+            block_shape = K.int_shape(block)
+            pool2 = AveragePooling2D(pool_size=(block_shape[ROW_AXIS], block_shape[COL_AXIS]),
+                                    strides=(1, 1))(block)
+            return pool2
+        
+        if double_input == False:
+            main_model = f(relu_positive)
+            flatten1 = Flatten()(main_model)
+            dense = Dense(units=num_outputs, kernel_initializer="he_normal",
+                        activation="softmax")(flatten1)
+            model = Model(inputs=input, outputs=dense)
+            
+            return model
         else:
-            block = _bn_relu(block)
+            positive_model = f(relu_positive)
+            negative_model = f(relu_negative)
+            concat = Concatenate(axis=3)([positive_model,negative_model])
+            flatten1 = Flatten()(concat)
+            dense = Dense(units=num_outputs, kernel_initializer="he_normal",
+                        activation="softmax")(flatten1)
+            model = Model(inputs=input, outputs=dense)
 
-        # Classifier block
-        #ROW_AXIS = _handle_dim_ordering().ROW_AXIS
-        #COL_AXIS = _handle_dim_ordering().COL_AXIS
-
-        block_shape = K.int_shape(block)
-        pool2 = AveragePooling2D(pool_size=(block_shape[ROW_AXIS], block_shape[COL_AXIS]),
-                                 strides=(1, 1))(block)
-        flatten1 = Flatten()(pool2)
-        dense = Dense(units=num_outputs, kernel_initializer="he_normal",
-                      activation="softmax")(flatten1)
-
-        model = Model(inputs=input, outputs=dense)
-        return model
-
-    @staticmethod
-    def build_resnet_18(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [2, 2, 2, 2])
-
-    @staticmethod
-    def build_resnet_34(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [3, 4, 6, 3])
-
-    @staticmethod
-    def build_resnet_50(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 6, 3])
-
-    @staticmethod
-    def build_resnet_101(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 23, 3])
-
-    @staticmethod
-    def build_resnet_152(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 8, 36, 3])
+            return model
     
     @staticmethod
-    def build_dualresnet_18(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [2, 2, 2, 2])
+    def build_manual(input_shape, num_outputs, option):
+        block = option["block"]
+
+        if block == "basic_block":
+            block_fn = basic_block
+        elif block == "bottleneck":
+            block_fn = bottleneck
+        elif block == "double_basic":
+            block_fn = dual_relu_basic_block
+        elif block == "double_bottleneck":
+            block_fn = dual_relu_bottleneck
+            
+            
+        return ResnetBuilder.build(input_shape, num_outputs,block_fn, [2,2,2,2], option = option)
 
     @staticmethod
-    def build_dualresnet_34(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [3, 4, 6, 3])
+    def build_resnet_18(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [2, 2, 2, 2],option = option)
 
     @staticmethod
-    def build_dualresnet_50(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 6, 3])
+    def build_resnet_34(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [3, 4, 6, 3],option = option)
 
     @staticmethod
-    def build_dualresnet_101(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 23, 3])
+    def build_resnet_50(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 6, 3],option = option)
 
     @staticmethod
-    def build_dualresnet_152(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 8, 36, 3])
+    def build_resnet_101(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 23, 3],option = option)
+
+    @staticmethod
+    def build_resnet_152(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 8, 36, 3],option = option)
+    
+    @staticmethod
+    def build_dualresnet_18(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False, "concatenate":False}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [2, 2, 2, 2],option = option)
+
+    @staticmethod
+    def build_dualresnet_34(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":False}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [3, 4, 6, 3],option = option)
+
+    @staticmethod
+    def build_dualresnet_50(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":False}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 6, 3],option = option)
+
+    @staticmethod
+    def build_dualresnet_101(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":False}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 23, 3],option = option)
+
+    @staticmethod
+    def build_dualresnet_152(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":False}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 8, 36, 3],option = option)
 
     #------------------------
     # option is true models
     #------------------------
 
     @staticmethod
-    def build_invert_relu_resnet_18(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [2, 2, 2, 2], option=True)
+    def build_invert_relu_resnet_18(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": True, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [2, 2, 2, 2], option = option)
 
     @staticmethod
-    def build_invert_relu_resnet_34(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [3, 4, 6, 3], option=True)
+    def build_invert_relu_resnet_34(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": True, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, basic_block, [3, 4, 6, 3], option = option)
 
     @staticmethod
-    def build_invert_relu_resnet_50(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 6, 3], option=True)
+    def build_invert_relu_resnet_50(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": True, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 6, 3], option = option)
 
     @staticmethod
-    def build_invert_relu_resnet_101(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 23, 3], option=True)
+    def build_invert_relu_resnet_101(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": True, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 4, 23, 3], option = option)
 
     @staticmethod
-    def build_invert_relu_resnet_152(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 8, 36, 3], option=True)
+    def build_invert_relu_resnet_152(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": True, "double_input": False}
+        return ResnetBuilder.build(input_shape, num_outputs, bottleneck, [3, 8, 36, 3], option = option)
     
     @staticmethod
-    def build_concatenate_dualresnet_18(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [2, 2, 2, 2], option=True)
+    def build_concatenate_dualresnet_18(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":True}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [2, 2, 2, 2], option = option)
 
     @staticmethod
-    def build_concatenate_dualresnet_34(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [3, 4, 6, 3], option=True)
+    def build_concatenate_dualresnet_34(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":True}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_basic_block, [3, 4, 6, 3], option = option)
 
     @staticmethod
-    def build_concatenate_dualresnet_50(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 6, 3], option=True)
+    def build_concatenate_dualresnet_50(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":True}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 6, 3], option = option)
 
     @staticmethod
-    def build_concatenate_dualresnet_101(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 23, 3], option=True)
+    def build_concatenate_dualresnet_101(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":True}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 4, 23, 3], option = option)
 
     @staticmethod
-    def build_concatenate_relu_dualresnet_152(input_shape, num_outputs):
-        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 8, 36, 3], option=True)
+    def build_concatenate_relu_dualresnet_152(input_shape, num_outputs, option = None):
+        if option is None:
+            option = {"relu_option": False, "double_input": False,"concatenate":True}
+        return ResnetBuilder.build(input_shape, num_outputs, dual_relu_bottleneck, [3, 8, 36, 3], option = option)
