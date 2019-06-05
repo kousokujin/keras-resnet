@@ -7,7 +7,8 @@ def json_write(tester,path):
         "relu_option": str(tester.option["relu_option"]),
         "double_input": str(tester.option["double_input"]),
         "block": str(tester.option["block"]),
-        "concatenate": str(tester.option["concatenate"])
+        "concatenate": str(tester.option["concatenate"]),
+        "reseption" : str(tester.option["reseption"])
     }
 
     accuracys = [str(n) for n in tester.history.history['acc']]

@@ -1,6 +1,7 @@
 import json
 import os
-
+import csv
+import datetime
 
 def include_dict(dict,key,value):
     '''辞書型の配列で指定keyとvalueが存在するか
@@ -95,6 +96,55 @@ def json_bar2_graph(graph_config,path):
     with open(path,mode='w') as f:
         json.dump(table,f,indent=4, sort_keys=True, separators=(',',': '))
 
+def outputcsv(OutputPath,SorceJson):
+    
+    with open(SorceJson) as f:
+        s = f.read()
+        json_data = json.loads(s)
+    
+    csvArray = []
+    colums = ["block",
+        "concatenate",
+        "input_mode",
+        "relu",
+        "dataset",
+        "batch_size",
+        "epoch",
+        "train_datas",
+        "test_datas",
+        "accuacy",
+        "time"]
+    csvArray.append(colums)
+
+    for d in json_data["result"]:
+        datas = []
+
+        datas.append(d["option"]["concatenate"])
+        datas.append(d["option"]["block"])
+
+        if d["option"]["double_input"] == "True":
+            datas.append("Double")
+        else:
+            datas.append("Single")
+        
+        datas.append(d["option"]["relu_option"])
+        datas.append(d["dataset"])
+        datas.append(d["batch_size"])
+        datas.append(d["epoch"])
+        datas.append(d["train_datas"])
+        datas.append(d["test_datas"])
+        datas.append(d["accuracy"])
+
+        start_time = datetime.datetime.strptime(d["start_time"],'%Y/%m/%d %H:%M:%S')
+        end_time = datetime.datetime.strptime(d["end_time"],'%Y/%m/%d %H:%M:%S')
+        dt = (end_time - start_time).seconds
+        datas.append(str(dt))
+        csvArray.append(datas)
+    
+    with open(OutputPath, 'w') as f:
+        #print(csvArray)
+        writer = csv.writer(f,lineterminator='\n')
+        writer.writerows(csvArray)
 
 config = {
     "title": "test",

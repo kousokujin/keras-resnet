@@ -138,7 +138,8 @@ class ResnetBuilder(object):
             block_fn = dual_relu_bottleneck
             
             
-        return ResnetBuilder.build(input_shape, num_outputs,block_fn, [2,2,2,2], option = option)
+        #return ResnetBuilder.build(input_shape, num_outputs,block_fn, [2,2,2,2], option = option)
+        return ResnetBuilder.build(input_shape, num_outputs,block_fn, option["reseption"], option = option)
 
     @staticmethod
     def build_resnet_18(input_shape, num_outputs, option = None):

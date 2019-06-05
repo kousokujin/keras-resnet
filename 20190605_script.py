@@ -53,7 +53,7 @@ dataset = cifer10_datasets(is_zero_center=True)
 
 for m in block_methods:
     for input_mode in double_input:
-        if m == "double_basic":
+        if m == "double_basic" or m == "double_bottleneck":
             for concate_mode in concatenate:
                 option = {
                     "relu_option": relu_option,
@@ -61,6 +61,14 @@ for m in block_methods:
                     "concatenate": concate_mode,
                     "block": m
                 }
+
+                if m == "double_bottleneck":
+                    d_opt = {"reseption" :[3,4,6,3]}
+                    option.update(d_opt)
+                else:
+                    d_opt = {"reseption" :[2,2,2,2]}
+                    option.update(d_opt)
+
 
                 model, tester = make(option,dataset,batch_size,epochs,split)
                 run(model,tester,global_name)
@@ -71,6 +79,13 @@ for m in block_methods:
                     "block": m,
                     "concatenate": "none"
             }
+            if m == "bottleneck":
+                    d_opt = {"reseption" :[3,4,6,3]}
+                    option.update(d_opt)
+            else:
+                d_opt = {"reseption" :[2,2,2,2]}
+                option.update(d_opt)
+
             model, tester = make(option,dataset,batch_size,epochs,split)
             run(model,tester,global_name)
 
