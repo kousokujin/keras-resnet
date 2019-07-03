@@ -27,20 +27,16 @@ def run(model,tester,global_name):
     json_write(tester,'result/'+global_name)
 
 
-global_name = "20190605_test.json"
+global_name = "20190622_test.json"
 
 block_methods=[
-    "basic_block",
-    "double_basic",
-    "bottleneck",
     "double_bottleneck"
 ]
 
 double_input=[
-    True,False
+    False
 ]
 concatenate=[
-    "half_concanate",
     "full_concanate",
     "sum"
 ]

@@ -6,6 +6,8 @@ from ModelBuilder import ResnetBuilder
 from keras import backend as K
 from datetime import datetime
 
+#from json_writer import json_write
+
 class ResNetTester:
 
     def setDataset(self,dataset):
@@ -27,7 +29,7 @@ class ResNetTester:
         #self.img_rows, self.img_cols = 32, 32
 
     def run_model(self,model):
-        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["acc"])
+        model.compile(loss="categorical_crossentropy", optimizer="sgd", metrics=["accuracy"])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.history = model.fit(self.trainX,self.trainY,batch_size=self.batch_size,nb_epoch=self.nb_epoch,verbose=1,validation_split=self.validation_split)
         self.end_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -39,6 +41,11 @@ class ResNetTester:
         print('Test accuracy:',self.score[1])
         self.accuracy = self.score[1]
         self.loss = self.score[0]
+
+    def run(self,model,global_name):
+        self.run_model(model)
+        self.evalute_model()
+        #json_write(self,'result/'+global_name)
 
     def __init__(self,option):
         self.option = option
