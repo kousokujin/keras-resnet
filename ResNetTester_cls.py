@@ -31,7 +31,13 @@ class ResNetTester:
     def run_model(self,model):
         model.compile(loss="categorical_crossentropy", optimizer="sgd", metrics=["accuracy"])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-        self.history = model.fit(self.trainX,self.trainY,batch_size=self.batch_size,nb_epoch=self.nb_epoch,verbose=1,validation_split=self.validation_split)
+        self.history = model.fit(
+            self.trainX,
+            self.trainY,
+            batch_size=self.batch_size,
+            nb_epoch=self.nb_epoch,
+            validation_data=(self.testX,self.testY),
+            shuffle= True)
         self.end_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.model = model
 

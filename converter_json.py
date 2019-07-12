@@ -113,7 +113,8 @@ def outputcsv(OutputPath,SorceJson):
         "train_datas",
         "test_datas",
         "accuacy",
-        "time"]
+        "time",
+        "final_acc"]
     csvArray.append(colums)
 
     for d in json_data["result"]:
@@ -139,6 +140,7 @@ def outputcsv(OutputPath,SorceJson):
         end_time = datetime.datetime.strptime(d["end_time"],'%Y/%m/%d %H:%M:%S')
         dt = (end_time - start_time).seconds
         datas.append(str(dt))
+        datas.append(d["acc"][-1])
         csvArray.append(datas)
     
     with open(OutputPath, 'w') as f:
