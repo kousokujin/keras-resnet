@@ -125,6 +125,9 @@ def run(model,tester,global_name,argment=False):
     tester.run(model,global_name,argment=argment)
 
 def check_run(option,json_result):
+
+    if not os.path.exists(json_result):
+        return False
     
     with open(json_result) as f:
         s = f.read()
