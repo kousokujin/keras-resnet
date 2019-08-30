@@ -1,0 +1,118 @@
+{
+    "options":[
+        {
+            "block": "basic_block",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "none",
+            "reseption" :[2,2,2,2],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0.5
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0.5
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0.8
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0.8
+        },
+        {
+            "block": "bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "none",
+            "reseption" :[3,4,6,3],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0.5
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0.5
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0.8
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0.8
+        }
+
+
+    ]
+}

@@ -22,27 +22,32 @@ def make(option,dataset,batch_size,epochs,split):
     return model,tester
 
 def run(model,tester,global_name):
-    tester.run_model(model)
+    tester.run_model_augmentation(model)
     tester.evalute_model()
     json_write(tester,'result/'+global_name)
 
 
-global_name = "20190622_test.json"
+global_name = "20190802_test.json"
 
 block_methods=[
+    "basic_block",
+    "bottleneck",
+    "double_basic",
     "double_bottleneck"
 ]
 
 double_input=[
-    False
+    False,
+    True
 ]
 concatenate=[
+    "half_concanate",
     "full_concanate",
     "sum"
 ]
 
 relu_option = False
-epochs = 10
+epochs = 1
 split = 1.0
 batch_size = 32
 dataset = cifer10_datasets(is_zero_center=True)

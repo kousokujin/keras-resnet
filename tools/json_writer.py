@@ -1,4 +1,8 @@
-from ResNetTester_cls import ResNetTester
+#from ..ResNetTester_cls import ResNetTester
+import sys
+sys.path.append('..')
+
+#from ResNetTester_cls import ResnetTester
 import json
 import os
 
@@ -8,7 +12,8 @@ def json_write(tester,path):
         "double_input": str(tester.option["double_input"]),
         "block": str(tester.option["block"]),
         "concatenate": str(tester.option["concatenate"]),
-        "reseption" : str(tester.option["reseption"])
+        "reseption" : str(tester.option["reseption"]),
+        "dropout": str(tester.option["dropout"])
     }
 
     accuracys = [str(n) for n in tester.history.history['acc']]
@@ -39,6 +44,15 @@ def json_write(tester,path):
         json_data = {
             "result": [result_list]
         }
+
+    direcotry_separate = path.split('/')
+    directory_name = ''
+
+    for i in range(len(direcotry_separate)-1):
+        directory_name += (direcotry_separate[i]+'/')
+    
+    if os.path.isdir(directory_name) == False:
+        os.makedirs(directory_name)
 
     with open(path,mode='w') as f:
         #f.write(json_dump)

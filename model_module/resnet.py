@@ -19,7 +19,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
 
-from Invert_ReLu_resnet import (_invert_bn_relu,_invert_bn_relu_conv)
+from .Invert_ReLu_resnet import (_invert_bn_relu,_invert_bn_relu_conv)
 
 
 def _conv_bn(**conv_params):
