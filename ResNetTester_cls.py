@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import json
+import datetime
 
 import keras.utils.np_utils as kutils
 from keras.preprocessing.image import ImageDataGenerator
@@ -11,6 +12,7 @@ from datetime import datetime
 
 #from json_writer import json_write
 from tools import json_writer
+from tools import discord
 
 class ResNetTester:
 
@@ -68,7 +70,7 @@ class ResNetTester:
             validation_data=(self.testX,self.testY),
             epochs=self.nb_epoch, verbose=1, max_q_size=100
         )
-
+        self.end_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.model = model
 
 
@@ -89,6 +91,7 @@ class ResNetTester:
         self.evalute_model()
         self.model_save(global_name)
         json_writer.json_write(self,'result/'+global_name+'.json')
+        self.discord_post()
     
     def model_save(self,global_name):
         print('save models')
@@ -107,9 +110,51 @@ class ResNetTester:
         self.model.save(filename)
 
         print('saved model!!('+filename+')')
+    
+    def discord_post(self):
+        
+        start_time_dt = datetime.strptime(self.start_time,'%Y/%m/%d %H:%M:%S')
+        end_time_dt = datetime.strptime(self.end_time,'%Y/%m/%d %H:%M:%S')
+        dt = (end_time_dt - start_time_dt).seconds
+
+        content = {
+            "embeds":[
+                {
+                    "fields":[
+                        {
+                            "name": "block",
+                            "value": str(self.option["block"])
+                        },
+                        {
+                            "name": "concatenate",
+                            "value": str(self.option["concatenate"])
+                        },
+                        {
+                            "name": "double_input",
+                            "value": str(self.option["double_input"])
+                        },
+                        {
+                            "name": "dropout",
+                            "value": str(self.option["dropout"])
+                        },
+                        {
+                            "name": "accuacy",
+                            "value": str(self.accuracy)
+                        },
+                        {
+                            "name": "time",
+                            "value": str(dt)
+                        }
+                    ]
+                }
+            ]
+        }
+
+        self.discord.post_dec(content)
 
     def __init__(self,option):
         self.option = option
+        self.discord = discord.discord_webhook("setting.json")
 
 
 def make(option,dataset,batch_size,epochs,split):

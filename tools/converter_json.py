@@ -109,6 +109,7 @@ def outputcsv(OutputPath,SorceJson):
         "relu",
         "dataset",
         "batch_size",
+        "dropout",
         "epoch",
         "train_datas",
         "test_datas",
@@ -131,6 +132,7 @@ def outputcsv(OutputPath,SorceJson):
         datas.append(d["option"]["relu_option"])
         datas.append(d["dataset"])
         datas.append(d["batch_size"])
+        datas.append(d["option"]["dropout"])
         datas.append(d["epoch"])
         datas.append(d["train_datas"])
         datas.append(d["test_datas"])
