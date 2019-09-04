@@ -19,7 +19,11 @@ class discord_webhook:
         post(post_dec,self.url)
 
     def post_dec(self,dec):
-        post(dec,self.url)
+        post_dec = {
+            "username":self.username
+        }
+        post_dec.update(dec)
+        post(post_dec,self.url)
     
 
     def __init__(self,settings):
