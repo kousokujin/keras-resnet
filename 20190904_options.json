@@ -1,0 +1,197 @@
+{
+    "options":[
+        {
+            "block": "basic_block",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "none",
+            "reseption" :[2,2,2,2],
+            "dropout": 0
+        },
+        {
+            "block": "basic_block",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "none",
+            "reseption" :[1,1,1,1],
+            "dropout": 0
+        },
+        {
+            "block": "basic_block",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "none",
+            "reseption" :[2,2,2,2],
+            "dropout": 0
+        },
+        {
+            "block": "basic_block",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "none",
+            "reseption" :[1,1,1,1],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[1,1,1,1],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[1,1,1,1],
+            "dropout": 0
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0.2
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[1,1,1,1],
+            "dropout": 0.2
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[2,2,2,2],
+            "dropout": 0.2
+        },
+        {
+            "block": "double_basic",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[1,1,1,1],
+            "dropout": 0.2
+        },
+        {
+            "block": "bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "none",
+            "reseption" :[3,4,6,3],
+            "dropout": 0
+        },
+        {
+            "block": "bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "none",
+            "reseption" :[1,2,3,1],
+            "dropout": 0
+        },
+        {
+            "block": "bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "none",
+            "reseption" :[3,4,6,3],
+            "dropout": 0
+        },
+        {
+            "block": "bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "none",
+            "reseption" :[1,2,3,1],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[1,2,3,1],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[1,2,3,1],
+            "dropout": 0
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0.2
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "full_concanate",
+            "reseption" :[1,2,3,1],
+            "dropout": 0.2
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[3,4,6,3],
+            "dropout": 0.2
+        },
+        {
+            "block": "double_bottleneck",
+            "relu_option":false,
+            "double_input":true,
+            "concatenate": "full_concanate",
+            "reseption" :[1,2,3,1],
+            "dropout": 0.2
+        }
+
+    ]
+}

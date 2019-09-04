@@ -7,14 +7,14 @@ from ResNetTester_cls import ResNetTester,make,check_run
 from Datasets import (cifer10_datasets,cifer100_datasets,mnist_dataset)
 
 
-global_name = "20190828"
+global_name = "20190904"
 
 relu_option = False
 epochs = 1
 split = 1.0
 batch_size = 32
 dataset = cifer10_datasets(is_zero_center=True)
-json_file = "20190828_options.json"
+json_file = "20190904_options.json"
 
 json_experience = ""
 with open(json_file) as f:
@@ -27,5 +27,6 @@ for e in json_experience["options"]:
     if isRuned == False:
         model, tester = make(e,dataset,batch_size,epochs,split)
         tester.run(model,global_name)
+        del tester
     else:
         print("skiped")

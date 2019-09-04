@@ -9,6 +9,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from model_module import ModelBuilder
 from keras import backend as K
 from datetime import datetime
+from keras import optimizers
 
 #from json_writer import json_write
 from tools import json_writer
@@ -35,7 +36,8 @@ class ResNetTester:
         #self.img_rows, self.img_cols = 32, 32
 
     def run_model(self,model):
-        model.compile(loss="categorical_crossentropy", optimizer="sgd", metrics=["accuracy"])
+        optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
+        model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.history = model.fit(
             self.trainX,
@@ -48,7 +50,8 @@ class ResNetTester:
         self.model = model
     
     def run_model_augmentation(self,model):
-        model.compile(loss="categorical_crossentropy", optimizer="sgd", metrics=["accuracy"])
+        optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
+        model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
         datagen = ImageDataGenerator(
@@ -138,6 +141,10 @@ class ResNetTester:
                             "value": str(self.option["dropout"])
                         },
                         {
+                            "name": "reseption",
+                            "value": str(self.option["reseption"])
+                        },
+                        {
                             "name": "accuacy",
                             "value": str(self.accuracy)
                         },
@@ -155,6 +162,10 @@ class ResNetTester:
     def __init__(self,option):
         self.option = option
         self.discord = discord.discord_webhook("setting.json")
+    
+    def __del__(self):
+        del self.model
+
 
 
 def make(option,dataset,batch_size,epochs,split):
@@ -184,7 +195,8 @@ def check_run(option,json_result):
         "block": str(option["block"]),
         "concatenate": str(option["concatenate"]),
         "reseption" : str(option["reseption"]),
-        "dropout": str(option["dropout"])
+        "dropout": str(option["dropout"]),
+        "reseption": str(option["reseption"])
     }
 
     for data in json_dict["result"]:
@@ -195,7 +207,8 @@ def check_run(option,json_result):
             (str_option["relu_option"] == data["option"]["relu_option"]) and
             (str_option["concatenate"] == data["option"]["concatenate"]) and
             (str_option["reseption"] == data["option"]["reseption"]) and
-            (str_option["dropout"] == data["option"]["dropout"])
+            (str_option["dropout"] == data["option"]["dropout"]) and
+            (str_option["reseption"] == data["option"]["reseption"])
         )
 
         if isRuned == True:
