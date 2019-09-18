@@ -56,6 +56,8 @@ class ResnetBuilder(object):
         #options
         inv_relu = bool(option["relu_option"])
         double_input = bool(option["double_input"])
+        default_filters=int(option["filters"])
+        wide = bool(option["wide"])
 
         if len(input_shape) != 3:
             raise Exception("Input shape should be a tuple (nb_channels, nb_rows, nb_cols)")
@@ -69,7 +71,10 @@ class ResnetBuilder(object):
         input = Input(shape=input_shape)
 
         #conv1 = _conv_bn_relu(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
-        conv1 = resnet._conv_bn(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
+        if wide == False:
+            conv1 = resnet._conv_bn(filters=64, kernel_size=(7, 7), strides=(2, 2))(input)
+        else:
+            conv1 = resnet._conv_bn(filters=16,kernel_size=(3,3),strides=(1,1))(input)
 
         if (block_fn == resnet.basic_block) or (block_fn == resnet.bottleneck) :
             if inv_relu == True:
@@ -84,11 +89,14 @@ class ResnetBuilder(object):
             invert = Lambda(lambda x: x*(-1))(conv1)
             relu_negative = Activation("relu")(invert)
 
-        def f(x):    
-            pool1 = resnet.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="same")(x)
-
-            block = pool1
-            filters = 64
+        def f(x):
+            if wide == False:   
+                pool1 = resnet.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="same")(x)
+                block = pool1
+            else:
+                block=x
+            filters = default_filters
+            #filters=64
             for i, r in enumerate(repetitions):
                 block = resnet._residual_block(block_fn, filters=filters, repetitions=r, option=option,is_first_layer=(i == 0))(block)
                 filters *= 2

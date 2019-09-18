@@ -9,9 +9,11 @@ option = {
     "relu_option": False,
     "double_input": False,
     "concatenate": "full_concanate",
-    "block": "double_bottleneck",
-    "reseption" :[2,2,2,2],
-    "dropout": 0.2
+    "block": "basic_block",
+    "reseption" :[2,2,2],
+    "dropout": 0,
+    "wide":True,
+    "filters": 128
 }
 model = ModelBuilder.ResnetBuilder.build_manual(dataset.get_shape(),dataset.get_categorical(),option)
 model.summary()

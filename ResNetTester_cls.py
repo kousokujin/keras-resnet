@@ -95,6 +95,7 @@ class ResNetTester:
         self.model_save(global_name)
         json_writer.json_write(self,'result/'+global_name+'.json')
         self.discord_post()
+        K.clear_session()
     
     def model_save(self,global_name):
         print('save models')
@@ -143,6 +144,14 @@ class ResNetTester:
                         {
                             "name": "reseption",
                             "value": str(self.option["reseption"])
+                        },
+                        {
+                            "name": "filters",
+                            "value": str(self.option["filters"])
+                        },
+                        {
+                            "name": "wide",
+                            "value": str(self.option["wide"])
                         },
                         {
                             "name": "accuacy",
@@ -196,7 +205,8 @@ def check_run(option,json_result):
         "concatenate": str(option["concatenate"]),
         "reseption" : str(option["reseption"]),
         "dropout": str(option["dropout"]),
-        "reseption": str(option["reseption"])
+        "wide": str(option["wide"]),
+        "filters": str(option["filters"])
     }
 
     for data in json_dict["result"]:
@@ -208,7 +218,9 @@ def check_run(option,json_result):
             (str_option["concatenate"] == data["option"]["concatenate"]) and
             (str_option["reseption"] == data["option"]["reseption"]) and
             (str_option["dropout"] == data["option"]["dropout"]) and
-            (str_option["reseption"] == data["option"]["reseption"])
+            (str_option["reseption"] == data["option"]["reseption"]) and
+            (str_option["wide"]) == data["option"]["wide"] and
+            (str_option["filters"])== data["option"]["filters"]
         )
 
         if isRuned == True:

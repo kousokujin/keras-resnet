@@ -7,7 +7,8 @@ from keras.layers import (
     Activation,
     Dense,
     Flatten,
-    Lambda
+    Lambda,
+    Dropout
 )
 from keras.layers.convolutional import (
     Conv2D,
@@ -90,7 +91,7 @@ def _conv_bn_InvRelu(**conv_params):
     return f
 
 
-def _bn_relu_conv(**conv_params):
+def _bn_relu_conv(dropout=0,**conv_params):
     """Helper to build a BN -> relu -> conv block.
     This is an improved scheme proposed in http://arxiv.org/pdf/1603.05027v2.pdf
     """
@@ -103,10 +104,15 @@ def _bn_relu_conv(**conv_params):
 
     def f(input):
         activation = _bn_relu(input)
+        
+        if dropout != 0:
+            DropLayer = Dropout(rate=dropout)(activation)
+        else:
+            DropLayer = activation
         return Conv2D(filters=filters, kernel_size=kernel_size,
                       strides=strides, padding=padding,
                       kernel_initializer=kernel_initializer,
-                      kernel_regularizer=kernel_regularizer)(activation)
+                      kernel_regularizer=kernel_regularizer)(DropLayer)
 
     return f
 
@@ -156,6 +162,7 @@ def basic_block(filters, option, init_strides=(1, 1), is_first_block_of_first_la
     Follows improved proposed scheme in http://arxiv.org/pdf/1603.05027v2.pdf
     """
     relu_option = option["relu_option"]
+    dropout = option["dropout"]
     def f(input):
 
         if is_first_block_of_first_layer:
@@ -177,7 +184,7 @@ def basic_block(filters, option, init_strides=(1, 1), is_first_block_of_first_la
         if relu_option:
             residual = _invert_bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv1)
         else:
-            residual = _bn_relu_conv(filters=filters, kernel_size=(3, 3))(conv1)
+            residual = _bn_relu_conv(dropout=dropout,filters=filters, kernel_size=(3, 3))(conv1)
         
         return _shortcut(input, residual)
 
