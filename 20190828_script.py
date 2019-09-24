@@ -7,14 +7,14 @@ from ResNetTester_cls import ResNetTester,make,check_run
 from Datasets import (cifer10_datasets,cifer100_datasets,mnist_dataset)
 
 
-global_name = "20190918"
+global_name = "20190924"
 
 relu_option = False
 epochs = 1
 split = 1.0
 batch_size = 128
 dataset = cifer10_datasets(is_zero_center=True)
-json_file = "20190918_options.json"
+json_file = "20190924_options"
 
 json_experience = ""
 with open(json_file) as f:

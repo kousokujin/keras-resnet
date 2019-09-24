@@ -36,7 +36,8 @@ class ResNetTester:
         #self.img_rows, self.img_cols = 32, 32
 
     def run_model(self,model):
-        optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
+        #optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
+        optimizer = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
         model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.history = model.fit(
