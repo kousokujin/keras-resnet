@@ -5,6 +5,7 @@ import datetime
 
 import keras.utils.np_utils as kutils
 from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import ReduceLROnPlateau, TensorBoard
 #from ModelBuilder import ResnetBuilder
 from model_module import ModelBuilder
 from keras import backend as K
@@ -36,8 +37,8 @@ class ResNetTester:
         #self.img_rows, self.img_cols = 32, 32
 
     def run_model(self,model):
-        #optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
-        optimizer = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+        optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
+        #optimizer = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
         model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.history = model.fit(
@@ -46,7 +47,9 @@ class ResNetTester:
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=(self.testX,self.testY),
-            shuffle= True)
+            shuffle= True,
+            callbacks=[self.lr_reducer,self.tb]
+            )
         self.end_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.model = model
     
@@ -72,7 +75,8 @@ class ResNetTester:
         model.fit_generator(datagen.flow(self.trainX, self.trainY, batch_size=self.batch_size),
             steps_per_epoch=self.trainX.shape[0] ,
             validation_data=(self.testX,self.testY),
-            epochs=self.nb_epoch, verbose=1, max_q_size=100
+            epochs=self.nb_epoch, verbose=1, max_q_size=100,
+            callbacks=[self.lr_reducer,self.tb]
         )
         self.end_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.model = model
@@ -86,8 +90,26 @@ class ResNetTester:
         self.accuracy = self.score[1]
         self.loss = self.score[0]
 
+    def get_name(self,global_name):
+        method = self.option["block"]
+        concanate = self.option["concatenate"]
+        double_input = str(self.option["double_input"])
+        dropout = str(self.option["dropout"])
+
+        return self.dataset_name+'_'+method+'_'+concanate+'_'+double_input+'_'+dropout
+
     def run(self,model,global_name,argment=False):
-        
+        self.lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
+        self.tb = TensorBoard(
+            log_dir='./result/tensofboard/'+self.get_name(global_name), 
+            histogram_freq=0, 
+            batch_size=32, 
+            write_graph=True, 
+            write_grads=False, 
+            write_images=False, 
+            embeddings_freq=0, 
+            embeddings_layer_names=None, 
+            embeddings_metadata=None)
         if argment == False:
             self.run_model(model)
         else:
@@ -102,12 +124,13 @@ class ResNetTester:
         print('save models')
         directory_name = 'result/'+global_name+'_models/'
         
-        method = self.option["block"]
-        concanate = self.option["concatenate"]
-        double_input = str(self.option["double_input"])
-        dropout = str(self.option["dropout"])
+        #method = self.option["block"]
+        #concanate = self.option["concatenate"]
+        #double_input = str(self.option["double_input"])
+        #dropout = str(self.option["dropout"])
 
-        filename =  directory_name+self.dataset_name+'_'+method+'_'+concanate+'_'+double_input+'_'+dropout+'.h5'
+        #filename =  directory_name+self.dataset_name+'_'+method+'_'+concanate+'_'+double_input+'_'+dropout+'.h5'
+        filename = directory_name+self.get_name(global_name)+'.h5'
 
         if os.path.isdir(directory_name) == False:
             os.makedirs(directory_name)

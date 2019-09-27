@@ -13,7 +13,8 @@ def json_write(tester,path):
         "block": str(tester.option["block"]),
         "concatenate": str(tester.option["concatenate"]),
         "reseption" : str(tester.option["reseption"]),
-        "dropout": str(tester.option["dropout"])
+        "dropout": str(tester.option["dropout"]),
+        "filters": str(tester.option["filters"])
     }
 
     accuracys = [str(n) for n in tester.history.history['acc']]
@@ -27,7 +28,7 @@ def json_write(tester,path):
         "test_datas": str(tester.test_data),
         "train_datas": str(tester.train_data),
         "accuracy": str(tester.accuracy),
-        "loss": str(tester.loss),
+        #"loss": str(tester.loss),
         "start_time": str(tester.start_time),
         "end_time": str(tester.end_time),
         "option": option,

@@ -12,9 +12,9 @@ global_name = "20190924"
 relu_option = False
 epochs = 1
 split = 1.0
-batch_size = 128
+batch_size = 32
 dataset = cifer10_datasets(is_zero_center=True)
-json_file = "20190924_options"
+json_file = "20190924_options_bk.json"
 
 json_experience = ""
 with open(json_file) as f:

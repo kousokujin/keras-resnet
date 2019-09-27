@@ -1,0 +1,11 @@
+block,concatenate,input_mode,relu,dataset,batch_size,dropout,wide,filters,epoch,train_datas,test_datas,accuacy,time,final_acc
+none,basic_block,Single,False,cifer10,32,0,False,64,10,50000,10000,0.7329,482,0.84162
+none,basic_block,Single,False,cifer10,32,0.2,False,64,10,50000,10000,0.7489,497,0.80068
+full_concanate,double_basic,Single,False,cifer10,32,0,False,64,10,50000,10000,0.7323,1459,0.82428
+full_concanate,double_basic,Single,False,cifer10,32,0.2,False,64,10,50000,10000,0.7031,1470,0.78446
+full_concanate,double_basic,Double,False,cifer10,32,0.2,False,64,10,50000,10000,0.7031,2910,0.78454
+none,basic_block,Single,False,cifer10,32,0.2,True,128,10,50000,10000,0.7863,1135,0.91368
+full_concanate,double_basic,Single,False,cifer10,32,0,True,64,10,50000,10000,0.8049,1202,0.92836
+full_concanate,double_basic,Single,False,cifer10,32,0.2,True,64,10,50000,10000,0.8439,1412,0.91384
+full_concanate,double_basic,Single,False,cifer10,32,0,True,128,10,50000,10000,0.8225,3387,0.91718
+full_concanate,double_basic,Single,False,cifer10,32,0.2,True,128,10,50000,10000,0.7944,3793,0.90364
