@@ -1,0 +1,14 @@
+{
+    "options":[
+        {
+            "block": "basic_block",
+            "relu_option":false,
+            "double_input":false,
+            "concatenate": "none",
+            "reseption" :[2,2,2,2],
+            "dropout": 0,
+            "wide": false,
+            "filters": 64
+        }
+    ]
+}

@@ -14,7 +14,8 @@ def json_write(tester,path):
         "concatenate": str(tester.option["concatenate"]),
         "reseption" : str(tester.option["reseption"]),
         "dropout": str(tester.option["dropout"]),
-        "filters": str(tester.option["filters"])
+        "filters": str(tester.option["filters"]),
+        "wide": str(tester.option["wide"])
     }
 
     accuracys = [str(n) for n in tester.history.history['acc']]

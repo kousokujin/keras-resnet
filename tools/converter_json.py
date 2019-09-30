@@ -96,6 +96,52 @@ def json_bar2_graph(graph_config,path):
     with open(path,mode='w') as f:
         json.dump(table,f,indent=4, sort_keys=True, separators=(',',': '))
 
+def outputcsv_allresult(OutputPath,SorceJson):
+    with open(SorceJson) as f:
+        s = f.read()
+        json_data = json.loads(s)
+    csvArray = []
+    colums = [
+        "concatenate",
+        "block",
+        "input_mode",
+        "relu",
+        "dropout",
+        "wide",
+        "filters",
+        "avg_accuacy",
+        "std_accuacy",
+        "avg_time",
+        "std_accuacy",
+    ]
+    csvArray.append(colums)
+
+    for d in json_data:
+        datas = []
+
+        datas.append(d["option"]["concatenate"])
+        datas.append(d["option"]["block"])
+
+        if d["option"]["double_input"] == "True":
+            datas.append("Double")
+        else:
+            datas.append("Single")
+        
+        datas.append(d["option"]["relu_option"])
+        datas.append(d["option"]["dropout"])
+        datas.append(d["option"]["wide"])
+        datas.append(d["option"]["filters"])
+        datas.append(str(float(d["mean_acc"])*100))
+        datas.append(str(float(d["var_acc"])*100))
+        datas.append(d["mean_time"])
+        datas.append(d["var_time"])
+        csvArray.append(datas)
+    
+    with open(OutputPath, 'w') as f:
+        #print(csvArray)
+        writer = csv.writer(f,lineterminator='\n')
+        writer.writerows(csvArray)
+
 def outputcsv(OutputPath,SorceJson):
     
     with open(SorceJson) as f:

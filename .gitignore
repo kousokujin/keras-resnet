@@ -8,3 +8,4 @@ result/
 # dev envs
 .idea/
 *.iml
+setting.json
