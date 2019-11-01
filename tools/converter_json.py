@@ -122,7 +122,7 @@ def outputcsv_allresult(OutputPath,SorceJson):
         datas.append(d["option"]["concatenate"])
         datas.append(d["option"]["block"])
 
-        if d["option"]["double_input"] == "True":
+        if d["option"]["double_input"] == True:
             datas.append("Double")
         else:
             datas.append("Single")

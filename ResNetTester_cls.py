@@ -97,8 +97,10 @@ class ResNetTester:
         concanate = self.option["concatenate"]
         double_input = str(self.option["double_input"])
         dropout = str(self.option["dropout"])
+        wide=str(self.option["wide"])
+        filters = str(self.option["filters"])
 
-        return self.dataset_name+'_'+method+'_'+concanate+'_'+double_input+'_'+dropout
+        return self.dataset_name+'_'+method+'_'+concanate+'_'+double_input+'_'+dropout+'_'+wide+'_'+filters
 
     def run(self,model,global_name,argment=False):
         self.lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1), cooldown=0, patience=5, min_lr=0.5e-6)
