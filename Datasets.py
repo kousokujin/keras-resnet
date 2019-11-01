@@ -23,11 +23,11 @@ class abstract_dataset:
         raise NotImplementedError()
 
     def __init__(self,is_zero_center=False):
-        (trainX, trainY), (testX, testY) = self.download()
+        (self.raw_trainX, trainY), (self.raw_testX, testY) = self.download()
 
-        trainX = trainX.astype('float32')
+        trainX = self.raw_trainX.astype('float32')
         trainX /= 255
-        testX = testX.astype('float32')
+        testX = self.raw_testX.astype('float32')
         testX /=255
 
         trainY = kutils.to_categorical(trainY)

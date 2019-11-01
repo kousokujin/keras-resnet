@@ -32,6 +32,7 @@ from keras.layers import (
 )
 from keras import backend as K
 from keras.models import Model
+from keras.layers import GlobalAveragePooling2D
 
 class ResnetBuilder(object):
     @staticmethod
@@ -115,15 +116,16 @@ class ResnetBuilder(object):
             #COL_AXIS = _handle_dim_ordering().COL_AXIS
 
             block_shape = K.int_shape(block)
-            pool2 = resnet.AveragePooling2D(pool_size=(block_shape[ROW_AXIS], block_shape[COL_AXIS]),
-                                    strides=(1, 1))(block)
-            return pool2
+            #pool2 = resnet.AveragePooling2D(pool_size=(block_shape[ROW_AXIS], block_shape[COL_AXIS]),
+                                    #strides=(1, 1))(block)
+            return block
         
         if double_input == False:
             main_model = f(relu_positive)
-            flatten1 = Flatten()(main_model)
+            #flatten1 = Flatten()(main_model)
+            global_pool = GlobalAveragePooling2D()(main_model)
             dense = Dense(units=num_outputs, kernel_initializer="he_normal",
-                        activation="softmax")(flatten1)
+                        activation="softmax")(global_pool)
             model = Model(inputs=input, outputs=dense)
             
             return model
@@ -131,9 +133,10 @@ class ResnetBuilder(object):
             positive_model = f(relu_positive)
             negative_model = f(relu_negative)
             concat = Concatenate(axis=3)([positive_model,negative_model])
-            flatten1 = Flatten()(concat)
+            #flatten1 = Flatten()(concat)
+            global_pool = GlobalAveragePooling2D()(concat)
             dense = Dense(units=num_outputs, kernel_initializer="he_normal",
-                        activation="softmax")(flatten1)
+                        activation="softmax")(global_pool)
             model = Model(inputs=input, outputs=dense)
 
             return model

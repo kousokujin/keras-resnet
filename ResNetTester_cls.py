@@ -2,6 +2,7 @@ import numpy as np
 import os
 import json
 import datetime
+import time
 
 import keras.utils.np_utils as kutils
 from keras.preprocessing.image import ImageDataGenerator
@@ -10,7 +11,7 @@ from keras.callbacks import ReduceLROnPlateau, TensorBoard
 from model_module import ModelBuilder
 from keras import backend as K
 from datetime import datetime
-from keras import optimizers
+from keras import optimizers,losses
 
 #from json_writer import json_write
 from tools import json_writer
@@ -39,23 +40,24 @@ class ResNetTester:
     def run_model(self,model):
         optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
         #optimizer = optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
-        model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"])
+        model.compile(loss=losses.binary_crossentropy, optimizer=optimizer, metrics=["accuracy"])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.history = model.fit(
             self.trainX,
             self.trainY,
             batch_size=self.batch_size,
-            nb_epoch=self.nb_epoch,
+            epochs=self.nb_epoch,
             validation_data=(self.testX,self.testY),
             shuffle= True,
             callbacks=[self.lr_reducer,self.tb]
             )
         self.end_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         self.model = model
+
     
     def run_model_augmentation(self,model):
         optimizer = optimizers.SGD(lr=0.1, decay=1e-4, momentum=0.9, nesterov=True)
-        model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"])
+        model.compile(optimizer=optimizer, loss=losses.binary_crossentropy, metrics=['acc'])
         self.start_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
         datagen = ImageDataGenerator(
@@ -84,7 +86,7 @@ class ResNetTester:
 
 
     def evalute_model(self):
-        self.score=self.model.evaluate(self.testX,self.testY,verbose=0)
+        self.score=self.model.evaluate(self.testX,self.testY,verbose=0,batch_size=self.batch_size)
         print('Test loss:',self.score[0])
         print('Test accuracy:',self.score[1])
         self.accuracy = self.score[1]
@@ -243,8 +245,8 @@ def check_run(option,json_result):
             (str_option["reseption"] == data["option"]["reseption"]) and
             (str_option["dropout"] == data["option"]["dropout"]) and
             (str_option["reseption"] == data["option"]["reseption"]) and
-            (str_option["wide"]) == data["option"]["wide"] and
-            (str_option["filters"])== data["option"]["filters"]
+            (str_option["wide"] == data["option"]["wide"]) and
+            (str_option["filters"]== data["option"]["filters"])
         )
 
         if isRuned == True:

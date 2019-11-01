@@ -8,13 +8,13 @@ dataset = cifer10_datasets(is_zero_center=False)
 option = {
     "relu_option": False,
     "double_input": False,
-    "concatenate": "full_concanate",
-    "block": "double_basic",
-    "reseption" :[2,2,2],
+    "concatenate": "none",
+    "block": "basic_block",
+    "reseption" :[2,2,2,2],
     "dropout": 0,
-    "wide":True,
+    "wide":False,
     "filters": 64
 }
 model = ModelBuilder.ResnetBuilder.build_manual(dataset.get_shape(),dataset.get_categorical(),option)
 model.summary()
-plot_model(model, to_file='model.png')
+plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
